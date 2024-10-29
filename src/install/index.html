@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalação - Sistema Maçônico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+            <div class="text-center">
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                    Instalação do Sistema
+                </h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Configure o administrador inicial
+                </p>
+            </div>
+            <form id="installForm" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="username" class="sr-only">Usuário Admin</label>
+                        <input id="username" name="username" type="text" required 
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Usuário Admin">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Senha</label>
+                        <input id="password" name="password" type="password" required
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Senha">
+                    </div>
+                    <div>
+                        <label for="confirmPassword" class="sr-only">Confirmar Senha</label>
+                        <input id="confirmPassword" name="confirmPassword" type="password" required
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Confirmar Senha">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Instalar Sistema
+                    </button>
+                </div>
+            </form>
+            <div id="message" class="mt-4 text-center hidden">
+                <p class="text-sm font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('installForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('message');
+            const messagePara = messageDiv.querySelector('p');
+
+            if (password !== confirmPassword) {
+                messageDiv.classList.remove('hidden', 'bg-green-50', 'text-green-800');
+                messageDiv.classList.add('bg-red-50', 'text-red-800');
+                messagePara.textContent = 'As senhas não coincidem';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/install', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.classList.remove('hidden', 'bg-red-50', 'text-red-800');
+                    messageDiv.classList.add('bg-green-50', 'text-green-800');
+                    messagePara.textContent = 'Sistema instalado com sucesso! Redirecionando...';
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                messageDiv.classList.remove('hidden', 'bg-green-50', 'text-green-800');
+                messageDiv.classList.add('bg-red-50', 'text-red-800');
+                messagePara.textContent = error.message || 'Erro ao instalar o sistema';
+            }
+        });
+    </script>
+</body>
+</html>
